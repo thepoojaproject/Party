@@ -28,23 +28,44 @@
             text-align: center;
             z-index: 10;
             padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
         }
         
         h1 {
-            font-size: 3rem;
-            margin-bottom: 20px;
-            text-shadow: 0 0 10px #ff9933, 0 0 20px #ff9933;
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px #ff9933, 0 0 20px #ff9933, 0 0 30px #ff9933;
             color: #ffcc00;
+            letter-spacing: 2px;
         }
         
         .subtitle {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             margin-bottom: 30px;
             color: #ffcc00;
+            font-weight: 300;
+        }
+        
+        .festival-info {
+            background: rgba(255, 204, 0, 0.1);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 204, 0, 0.3);
+        }
+        
+        .festival-info p {
+            margin: 10px 0;
+            line-height: 1.5;
         }
         
         .controls {
-            margin: 20px 0;
+            margin: 25px 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
         }
         
         button {
@@ -52,12 +73,12 @@
             border: none;
             color: white;
             padding: 12px 25px;
-            margin: 0 10px;
             border-radius: 30px;
             font-size: 1rem;
             cursor: pointer;
             box-shadow: 0 0 15px rgba(255, 153, 51, 0.7);
             transition: all 0.3s ease;
+            min-width: 150px;
         }
         
         button:hover {
@@ -82,17 +103,24 @@
             text-shadow: 0 0 5px rgba(255, 204, 0, 0.7);
             opacity: 0;
             transition: opacity 1s;
+            min-height: 40px;
         }
         
         .show {
             opacity: 1;
         }
         
+        .diya-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 25px 0;
+        }
+        
         .diya {
             width: 80px;
             height: 80px;
             position: relative;
-            margin: 20px auto;
         }
         
         .flame {
@@ -118,25 +146,85 @@
             border-radius: 0 0 10px 10px;
             margin: 0 auto;
         }
+        
+        .footer {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        
+        .counter {
+            margin: 15px 0;
+            font-size: 1.2rem;
+            color: #ffcc00;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 80%;
+            }
+            
+            .diya-container {
+                gap: 15px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Happy Diwali!</h1>
-        <p class="subtitle">Celebrate with virtual firecrackers</p>
+        <p class="subtitle">Celebrate with virtual firecrackers - Safe and Eco-friendly</p>
         
-        <div class="diya">
-            <div class="flame"></div>
-            <div class="base"></div>
+        <div class="festival-info">
+            <p>Diwali, the Festival of Lights, symbolizes the victory of light over darkness and good over evil.</p>
+            <p>Celebrate responsibly with these virtual fireworks!</p>
+        </div>
+        
+        <div class="diya-container">
+            <div class="diya">
+                <div class="flame"></div>
+                <div class="base"></div>
+            </div>
+            <div class="diya">
+                <div class="flame"></div>
+                <div class="base"></div>
+            </div>
+            <div class="diya">
+                <div class="flame"></div>
+                <div class="base"></div>
+            </div>
+        </div>
+        
+        <div class="counter">
+            Fireworks Burst: <span id="counter">0</span>
         </div>
         
         <div class="controls">
             <button id="burstBtn">Burst Crackers</button>
             <button id="autoBtn">Auto Mode</button>
             <button id="stopBtn">Stop</button>
+            <button id="resetBtn">Reset</button>
         </div>
         
         <p class="message" id="message">Wishing you prosperity and happiness!</p>
+        
+        <div class="footer">
+            <p>Click anywhere on the screen to create fireworks!</p>
+        </div>
     </div>
     
     <div class="canvas-container">
@@ -148,6 +236,7 @@
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const message = document.getElementById('message');
+        const counterElement = document.getElementById('counter');
         
         // Set canvas to full window size
         function resizeCanvas() {
@@ -160,7 +249,7 @@
         
         // Particle class for firecracker effects
         class Particle {
-            constructor(x, y, color, velocity, size, decay) {
+            constructor(x, y, color, velocity, size, decay, shape = 'circle') {
                 this.x = x;
                 this.y = y;
                 this.color = color;
@@ -169,6 +258,9 @@
                 this.decay = decay;
                 this.alpha = 1;
                 this.gravity = 0.01;
+                this.shape = shape;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.1;
             }
             
             update() {
@@ -181,25 +273,63 @@
                 
                 this.alpha -= this.decay;
                 this.size -= this.decay * 2;
+                this.rotation += this.rotationSpeed;
             }
             
             draw() {
                 ctx.save();
                 ctx.globalAlpha = this.alpha;
                 ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                
+                if (this.shape === 'circle') {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (this.shape === 'star') {
+                    this.drawStar(0, 0, this.size, this.size * 0.5, 5);
+                } else if (this.shape === 'square') {
+                    ctx.fillRect(-this.size, -this.size, this.size * 2, this.size * 2);
+                }
+                
                 ctx.restore();
+            }
+            
+            drawStar(cx, cy, outerRadius, innerRadius, points) {
+                let rot = Math.PI / 2 * 3;
+                let x = cx;
+                let y = cy;
+                const step = Math.PI / points;
+                
+                ctx.beginPath();
+                ctx.moveTo(cx, cy - outerRadius);
+                
+                for (let i = 0; i < points; i++) {
+                    x = cx + Math.cos(rot) * outerRadius;
+                    y = cy + Math.sin(rot) * outerRadius;
+                    ctx.lineTo(x, y);
+                    rot += step;
+                    
+                    x = cx + Math.cos(rot) * innerRadius;
+                    y = cy + Math.sin(rot) * innerRadius;
+                    ctx.lineTo(x, y);
+                    rot += step;
+                }
+                
+                ctx.lineTo(cx, cy - outerRadius);
+                ctx.closePath();
+                ctx.fill();
             }
         }
         
         // Firecracker burst effect
         class Firecracker {
-            constructor(x, y) {
+            constructor(x, y, type = 'normal') {
                 this.x = x;
                 this.y = y;
                 this.particles = [];
+                this.type = type;
                 this.colors = [
                     '#ff0000', '#ff9900', '#ffff00', '#00ff00', 
                     '#00ffff', '#0000ff', '#ff00ff', '#ffffff'
@@ -208,22 +338,24 @@
             }
             
             createBurst() {
-                const particleCount = 150;
+                const particleCount = this.type === 'normal' ? 150 : 200;
+                const shapes = this.type === 'special' ? ['circle', 'star', 'square'] : ['circle'];
                 
                 for (let i = 0; i < particleCount; i++) {
                     const angle = Math.random() * Math.PI * 2;
-                    const speed = Math.random() * 5 + 2;
+                    const speed = Math.random() * (this.type === 'special' ? 7 : 5) + 2;
                     const velocity = {
                         x: Math.cos(angle) * speed,
                         y: Math.sin(angle) * speed
                     };
                     
                     const color = this.colors[Math.floor(Math.random() * this.colors.length)];
-                    const size = Math.random() * 3 + 1;
+                    const size = Math.random() * (this.type === 'special' ? 4 : 3) + 1;
                     const decay = Math.random() * 0.02 + 0.005;
+                    const shape = shapes[Math.floor(Math.random() * shapes.length)];
                     
                     this.particles.push(new Particle(
-                        this.x, this.y, color, velocity, size, decay
+                        this.x, this.y, color, velocity, size, decay, shape
                     ));
                 }
             }
@@ -307,17 +439,75 @@
             }
         }
         
+        // Fountain effect
+        class Fountain {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.particles = [];
+                this.timer = 0;
+                this.duration = 120;
+                this.colors = ['#ff0000', '#ff9900', '#ffff00', '#00ff00'];
+            }
+            
+            update() {
+                this.timer++;
+                
+                // Create new particles
+                if (this.timer < this.duration) {
+                    for (let i = 0; i < 5; i++) {
+                        const angle = Math.random() * Math.PI * 0.4 - Math.PI * 0.2;
+                        const speed = Math.random() * 4 + 3;
+                        const velocity = {
+                            x: Math.cos(angle) * speed,
+                            y: Math.sin(angle) * speed - 8
+                        };
+                        
+                        const color = this.colors[Math.floor(Math.random() * this.colors.length)];
+                        const size = Math.random() * 2 + 1;
+                        const decay = Math.random() * 0.015 + 0.005;
+                        
+                        this.particles.push(new Particle(
+                            this.x, this.y, color, velocity, size, decay
+                        ));
+                    }
+                }
+                
+                // Update existing particles
+                this.particles.forEach((particle, index) => {
+                    particle.update();
+                    
+                    if (particle.alpha <= 0 || particle.size <= 0) {
+                        this.particles.splice(index, 1);
+                    }
+                });
+            }
+            
+            draw() {
+                this.particles.forEach(particle => particle.draw());
+            }
+            
+            isFinished() {
+                return this.timer >= this.duration && this.particles.length === 0;
+            }
+        }
+        
         // Main animation variables
         let firecrackers = [];
         let sparklers = [];
+        let fountains = [];
         let animationId;
         let autoMode = false;
+        let burstCounter = 0;
         
         // Create a random firecracker burst
-        function createFirecracker() {
+        function createFirecracker(type = 'normal') {
             const x = Math.random() * canvas.width;
             const y = Math.random() * canvas.height * 0.8;
-            firecrackers.push(new Firecracker(x, y));
+            firecrackers.push(new Firecracker(x, y, type));
+            
+            burstCounter++;
+            counterElement.textContent = burstCounter;
             
             // Show message occasionally
             if (Math.random() > 0.7) {
@@ -332,6 +522,13 @@
             sparklers.push(new Sparkler(x, y));
         }
         
+        // Create a fountain
+        function createFountain() {
+            const x = Math.random() * canvas.width;
+            const y = canvas.height * 0.9;
+            fountains.push(new Fountain(x, y));
+        }
+        
         // Show festive message
         function showMessage() {
             const messages = [
@@ -339,7 +536,10 @@
                 "Shubh Deepawali!",
                 "Spread the light!",
                 "Joy and Prosperity!",
-                "Let's celebrate!"
+                "Let's celebrate!",
+                "Light up your life!",
+                "May goodness prevail!",
+                "Wishing you happiness!"
             ];
             
             message.textContent = messages[Math.floor(Math.random() * messages.length)];
@@ -376,14 +576,28 @@
                 }
             });
             
+            // Update and draw fountains
+            fountains.forEach((fountain, index) => {
+                fountain.update();
+                fountain.draw();
+                
+                if (fountain.isFinished()) {
+                    fountains.splice(index, 1);
+                }
+            });
+            
             // Auto mode - create random effects
             if (autoMode) {
+                if (Math.random() > 0.93) {
+                    createFirecracker(Math.random() > 0.8 ? 'special' : 'normal');
+                }
+                
                 if (Math.random() > 0.95) {
-                    createFirecracker();
+                    createSparkler();
                 }
                 
                 if (Math.random() > 0.97) {
-                    createSparkler();
+                    createFountain();
                 }
             }
             
@@ -396,7 +610,8 @@
         // Event listeners for buttons
         document.getElementById('burstBtn').addEventListener('click', function() {
             createFirecracker();
-            createSparkler();
+            if (Math.random() > 0.5) createSparkler();
+            if (Math.random() > 0.7) createFountain();
         });
         
         document.getElementById('autoBtn').addEventListener('click', function() {
@@ -408,13 +623,27 @@
             autoMode = false;
         });
         
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            firecrackers = [];
+            sparklers = [];
+            fountains = [];
+            burstCounter = 0;
+            counterElement.textContent = burstCounter;
+        });
+        
         // Also create firecrackers on click anywhere
         canvas.addEventListener('click', function(e) {
             const rect = canvas.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
             
-            firecrackers.push(new Firecracker(x, y));
+            firecrackers.push(new Firecracker(x, y, Math.random() > 0.7 ? 'special' : 'normal'));
+            burstCounter++;
+            counterElement.textContent = burstCounter;
+            
+            if (Math.random() > 0.5) {
+                createSparkler();
+            }
         });
         
         // Create initial effects
