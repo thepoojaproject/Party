@@ -1,9 +1,9 @@
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diwali Crackers Burst</title>
+    <title>Diwali Firecracker Animation</title>
     <style>
         * {
             margin: 0;
@@ -14,7 +14,7 @@
         body {
             background: #0a0a2a;
             color: white;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -38,6 +38,16 @@
             text-shadow: 0 0 10px #ff9933, 0 0 20px #ff9933, 0 0 30px #ff9933;
             color: #ffcc00;
             letter-spacing: 2px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px #ff9933, 0 0 20px #ff9933, 0 0 30px #ff9933;
+            }
+            to {
+                text-shadow: 0 0 15px #ff9933, 0 0 25px #ff9933, 0 0 35px #ff9933, 0 0 45px #ff9933;
+            }
         }
         
         .subtitle {
@@ -53,6 +63,7 @@
             padding: 15px;
             margin: 20px 0;
             border: 1px solid rgba(255, 204, 0, 0.3);
+            backdrop-filter: blur(5px);
         }
         
         .festival-info p {
@@ -79,6 +90,8 @@
             box-shadow: 0 0 15px rgba(255, 153, 51, 0.7);
             transition: all 0.3s ease;
             min-width: 150px;
+            font-weight: bold;
+            letter-spacing: 1px;
         }
         
         button:hover {
@@ -104,6 +117,7 @@
             opacity: 0;
             transition: opacity 1s;
             min-height: 40px;
+            font-weight: bold;
         }
         
         .show {
@@ -157,6 +171,43 @@
             margin: 15px 0;
             font-size: 1.2rem;
             color: #ffcc00;
+            font-weight: bold;
+        }
+        
+        /* Rangoli decoration */
+        .rangoli {
+            position: absolute;
+            bottom: 20px;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, transparent 30%, rgba(255, 204, 0, 0.2) 70%);
+            border-radius: 50%;
+            z-index: 2;
+            animation: rotate 20s linear infinite;
+        }
+        
+        .rangoli::before, .rangoli::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 2px dashed rgba(255, 204, 0, 0.5);
+            border-radius: 50%;
+            top: 0;
+            left: 0;
+        }
+        
+        .rangoli::before {
+            transform: rotate(60deg);
+        }
+        
+        .rangoli::after {
+            transform: rotate(120deg);
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
         /* Responsive adjustments */
@@ -180,6 +231,11 @@
             
             .diya-container {
                 gap: 15px;
+            }
+            
+            .rangoli {
+                width: 150px;
+                height: 150px;
             }
         }
     </style>
@@ -226,6 +282,8 @@
             <p>Click anywhere on the screen to create fireworks!</p>
         </div>
     </div>
+    
+    <div class="rangoli"></div>
     
     <div class="canvas-container">
         <canvas id="canvas"></canvas>
