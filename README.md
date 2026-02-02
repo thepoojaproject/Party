@@ -239,7 +239,7 @@
         </div>
         
         <div class="footer">
-            <p>PALETTIST &copy; 2023 | Made with <i class="fas fa-heart" style="color:#e74c3c"></i></p>
+            <p>PALETTIST &copy; 2023 | Made with <i class="fas fa-heart" style="color:#e74c3c"></i> for Pooja</p>
         </div>
     </div>
 
